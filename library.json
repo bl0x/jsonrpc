@@ -6,5 +6,9 @@
   {
     "type": "git",
     "url": "https://bitbucket.org/vandrham/jsonrpc.git"
+  },
+  "dependencies":
+  {
+    "name": "aJSON"
   }
 } 
