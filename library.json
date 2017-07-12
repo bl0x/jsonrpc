@@ -1,0 +1,10 @@
+{
+  "name": "JsonRPC",
+  "keywords": "json, rpc",
+  "description": "An Arduino library to enable JSON-RPC communication",
+  "repository":
+  {
+    "type": "git",
+    "url": "https://bitbucket.org/vandrham/jsonrpc.git"
+  }
+} 
