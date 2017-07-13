@@ -2,6 +2,9 @@
   "name": "JsonRPC",
   "keywords": "json, rpc",
   "description": "An Arduino library to enable JSON-RPC communication",
+  "authors": {
+    "name": "Edwin van der Ham"
+  },
   "repository":
   {
     "type": "git",
