@@ -4,10 +4,12 @@
 #include "Arduino.h"
 #include "aJSON.h"
 
+typedef void (*ajson_callback)(aJsonObject*, int);
+
 struct Mapping
 {
     String name;
-    void (*callback)(aJsonObject*);
+    ajson_callback callback;
 };
 
 struct FuncMap
@@ -20,11 +22,12 @@ struct FuncMap
 class JsonRPC
 {
     public:
-	JsonRPC(int capacity);
-	void registerMethod(String methodname, void(*callback)(aJsonObject*));
+	JsonRPC(int capacity, Stream *serial = &Serial);
+	void registerMethod(String methodname, ajson_callback);
 	void processMessage(aJsonObject *msg);
     private:
 	FuncMap* mymap;
+	Stream *serial;
 };
 
 #endif
