@@ -23,21 +23,28 @@ void JsonRPC::registerMethod(String methodName, ajson_callback callback)
     }
 }
 
-void JsonRPC::processMessage(aJsonObject *msg)
+enum {
+	SUCCESS = 0,
+	E_NO_METHOD,
+	E_NO_PARAMS,
+	E_NO_MATCH
+};
+
+int JsonRPC::processMessage(aJsonObject *msg)
 {
     aJsonObject* method = aJson.getObjectItem(msg, "method");
     if (!method)
     {
 	// not a valid Json-RPC message
         serial->flush();
-        return;
+        return E_NO_METHOD;
     }
 
     aJsonObject* params = aJson.getObjectItem(msg, "params");
     if (!params)
     {
 	serial->flush();
-	return;
+	return E_NO_PARAMS;
     }
 
     aJsonObject* id = aJson.getObjectItem(msg, "id");
@@ -50,13 +57,23 @@ void JsonRPC::processMessage(aJsonObject *msg)
     }
 
     String methodName = method->valuestring;
+    int ok = 0;
     for (int i=0; i<mymap->used; i++)
     {
         Mapping* mapping = &(mymap->mappings[i]);
         if (methodName.equals(mapping->name))
         {
-	    mapping->callback(params, id_value);
+	    struct JsonRPCInfo info;
+	    info.id = id_value;
+	    info.serial = serial;
+	    mapping->callback(params, info);
+	    ok = 1;
 	}
+    }
+    if (ok == 0) {
+	    return E_NO_MATCH;
+    } else {
+	    return SUCCESS;
     }
 }
 
