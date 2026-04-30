@@ -27,8 +27,27 @@ enum {
 	SUCCESS = 0,
 	E_NO_METHOD,
 	E_NO_PARAMS,
-	E_NO_MATCH
+	E_NO_MATCH,
+	E_CRC_FAIL
 };
+
+/* CRC-8 algorithm, like for CANbus */
+unsigned char
+crc8_sae_j1850(const unsigned char *data, int size) {
+	unsigned char crc = 0xFF;
+	int i, bit;
+	for (i = 0; i < size; i++) {
+		crc ^= data[i];
+		for (bit = 0; bit < 8; bit++) {
+			if (crc & 0x80) {
+				crc = (crc << 1) ^ 0x1D;
+			} else {
+				crc <<= 1;
+			}
+		}
+	}
+	return crc ^ 0xFF;
+}
 
 int JsonRPC::processMessage(aJsonObject *msg)
 {
@@ -56,7 +75,23 @@ int JsonRPC::processMessage(aJsonObject *msg)
 	    id_value = id->valueint;
     }
 
+    aJsonObject* crc = aJson.getObjectItem(msg, "crc");
+    unsigned char crc_value = 0;
+    if (crc)
+    {
+	    crc_value = (unsigned char)crc->valueint;
+    }
+
     String methodName = method->valuestring;
+
+    unsigned char crc_check = crc8_sae_j1850(
+        (unsigned char *)methodName.c_str(), methodName.length());
+
+    if (crc && crc_value != crc_check) {
+	    serial->flush();
+	    return E_CRC_FAIL;
+    }
+
     int ok = 0;
     for (int i=0; i<mymap->used; i++)
     {

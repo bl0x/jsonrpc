@@ -36,4 +36,6 @@ class JsonRPC
 	Stream *serial;
 };
 
+unsigned char crc8_sae_j1850(const unsigned char *, int);
+
 #endif
